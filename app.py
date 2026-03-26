@@ -197,5 +197,12 @@ def confirm_payment():
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
-    # Local-la run panna 5000 port and debug True vai
-    app.run(debug=True, port=5000)
+    app.run(debug=True, port=5000, host='127.0.0.1')
+    # ... (matha code ellam mela irukkum)
+
+# Idhu dhaan un database tables-ah automatic-ah create pannum
+with app.app_context():
+    db.create_all()
+
+if __name__ == '__main__':
+    app.run(debug=True)
