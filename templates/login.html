@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buddy AI - Login</title>
+    
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <div class="auth-wrapper">
+        <div class="auth-card">
+            <div class="auth-logo-container">
+                <img src="{{ url_for('static', filename='buddy_robot.png') }}" alt="Buddy AI">
+            </div>
+            
+            <h2 style="color: white; margin-bottom: 8px; font-weight: 700;">Welcome Back</h2>
+            <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 30px;">Login to chat with <span style="color: var(--accent); font-weight: 600;">Buddy AI</span></p>
+            
+            <form action="/login" method="POST">
+                <div class="input-group">
+                    <i class="fas fa-user"></i>
+                    <input type="text" name="username" placeholder="Username" required autocomplete="off">
+                </div>
+
+                <div class="input-group">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" name="password" id="password" placeholder="Password" required>
+                    <i class="fas fa-eye" onclick="togglePassword()" style="cursor: pointer; color: var(--text-muted); transition: 0.3s;" onmouseover="this.style.color='white'" onmouseout="this.style.color='var(--text-muted)'"></i>
+                </div>
+
+                <button type="submit" class="primary-btn" style="margin-top: 5px;">Login securely</button>
+            </form>
+
+            <div class="divider">OR CONTINUE WITH</div>
+
+            <div class="social-grid">
+    <a href="/login/github" class="social-btn"><i class="fab fa-github"></i></a>
+    
+    <a href="#" onclick="socialAlert('Google')" class="social-btn"><i class="fab fa-google" style="color: #ea4335;"></i></a>
+    <a href="#" onclick="socialAlert('Apple')" class="social-btn"><i class="fab fa-apple" style="color: #ffffff;"></i></a>
+    <a href="#" onclick="socialAlert('Windows')" class="social-btn"><i class="fab fa-windows" style="color: #00a4ef;"></i></a>
+</div>
+
+<script>
+function socialAlert(provider) {
+    alert(provider + " login coming soon macha! Ippo GitHub use pannu.");
+}
+</script>
+
+            <div style="color: var(--text-muted); font-size: 14px;">
+                Don't have an account? 
+                <a href="/signup" style="color: var(--accent); text-decoration: none; font-weight: 600;">Sign Up</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function togglePassword() {
+            const p = document.getElementById('password');
+            p.type = p.type === 'password' ? 'text' : 'password';
+        }
+    </script>
+</body>
+</html>

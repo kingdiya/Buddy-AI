@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buddy AI - Premium</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <img src="{{ url_for('static', filename='buddy_robot.png') }}" alt="Buddy">
+            <h2>Buddy AI</h2>
+        </div>
+        
+        <button class="nav-btn" onclick="location.reload()">
+            <i class="fas fa-plus"></i> New Chat
+        </button>
+        
+        <div style="margin-top: 20px;">
+            <div class="nav-item" onclick="loadHistory()"><i class="fas fa-history"></i> History</div>
+            <div class="nav-item" onclick="alert('Private Chat Activated! 🕵️‍♂️')"><i class="fas fa-user-secret"></i> Private Chat</div>
+            <div class="nav-item" onclick="copyShareLink()"><i class="fas fa-share-alt"></i> Share App</div>
+            <a href="/logout" class="nav-item"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        </div>
+
+        <div class="profile-box" onclick="document.getElementById('profileModal').style.display='flex'">
+            <div class="profile-avatar">{{ current_user.username[0] | upper }}</div>
+            <div>
+                <div style="color: white; font-weight: 600; font-size: 14px;">{{ current_user.username }}</div>
+                <div style="color: var(--accent); font-size: 12px; font-weight: 500;">
+                    {{ 'PRO User ✨' if current_user.is_pro else 'Basic User' }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-area">
+        <img src="{{ url_for('static', filename='buddy_robot.png') }}" class="robot-watermark" alt="Buddy Background">
+
+        <div id="welcome-screen" class="welcome-container" style="position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); text-align: center; width: 100%; z-index: 10;">
+            <h1 style="font-size: 48px; font-weight: 700; color: white;">Hello {{ current_user.username }},</h1>
+            <h1 style="font-size: 48px; font-weight: 700; color: rgba(255,255,255,0.2); margin-top: 5px;">How can I help you today?</h1>
+        </div>
+
+        <div id="chat-box" class="chat-container" style="display: none;"></div>
+
+        <div class="input-wrapper">
+            <div class="chat-input-box">
+                <input type="file" id="file-upload" style="display: none;" onchange="handleFileUpload(event)">
+                <button class="icon-btn" onclick="document.getElementById('file-upload').click()"><i class="fas fa-paperclip"></i></button>
+                
+                <input type="text" id="user-input" placeholder="Ask Buddy anything..." autocomplete="off" onkeypress="if(event.key==='Enter') sendMessage()">
+                
+                <button class="icon-btn" onclick="startMic()"><i class="fas fa-microphone"></i></button>
+                <button class="icon-btn" onclick="sendMessage()"><i class="fas fa-paper-plane" style="color: var(--accent);"></i></button>
+            </div>
+            <p style="text-align: center; color: var(--text-muted); font-size: 11px; margin-top: 10px;">Buddy AI can make mistakes. Verify important info.</p>
+        </div>
+    </div>
+
+    <div id="profileModal" class="modal">
+        <div class="modal-content">
+            <i class="fas fa-times close-btn" onclick="document.getElementById('profileModal').style.display='none'"></i>
+            <div class="profile-avatar" style="width: 80px; height: 80px; font-size: 32px; margin: 0 auto 20px;">
+                {{ current_user.username[0] | upper }}
+            </div>
+            
+            <form action="/update_profile" method="POST">
+                <input type="text" name="username" value="{{ current_user.username }}" class="form-input" placeholder="Name" required>
+                <input type="text" name="email" value="{{ current_user.contact }}" class="form-input" placeholder="Email / Mobile">
+                
+                <div style="display: flex; gap: 10px;">
+                    <input type="number" name="age" value="{{ current_user.age }}" class="form-input" placeholder="Age">
+                    <input type="text" name="year" value="{{ current_user.year }}" class="form-input" placeholder="Year">
+                </div>
+                
+                <button type="submit" class="primary-btn">Save Profile</button>
+            </form>
+            
+            <button onclick="document.getElementById('profileModal').style.display='none'; document.getElementById('subModal').style.display='flex';" class="primary-btn" style="background: transparent; border: 1px solid var(--accent); color: white; margin-top: 15px;">
+                Upgrade to PRO ✨
+            </button>
+        </div>
+    </div>
+
+    <div id="subModal" class="modal">
+        <div class="modal-content" style="width: 450px;">
+            <i class="fas fa-times close-btn" onclick="document.getElementById('subModal').style.display='none'"></i>
+            <h2 style="color: white; margin-bottom: 20px;">Choose a Plan</h2>
+            
+            <div class="plan-card" onclick="openPay('1week')">
+                <h3 style="color: white;">1 Week Plan</h3>
+                <p style="color: var(--accent); font-weight: bold; margin-top: 5px;">Win Pay - ₹19</p>
+            </div>
+            <div class="plan-card" onclick="openPay('1month')" style="border-color: var(--accent); background: rgba(56, 189, 248, 0.05);">
+                <h3 style="color: white;">1 Month Plan <span style="font-size: 11px; background: var(--accent); color: #000; padding: 2px 6px; border-radius: 8px; vertical-align: middle; margin-left: 5px;">POPULAR</span></h3>
+                <p style="color: var(--accent); font-weight: bold; margin-top: 5px;">Win Pay - ₹49</p>
+            </div>
+            <div class="plan-card" onclick="openPay('1year')">
+                <h3 style="color: white;">1 Year Plan</h3>
+                <p style="color: var(--accent); font-weight: bold; margin-top: 5px;">Win Pay - ₹99</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="paymentModal" class="modal">
+        <div class="modal-content">
+            <i class="fas fa-times close-btn" onclick="document.getElementById('paymentModal').style.display='none'"></i>
+            <h2 style="color: white; margin-bottom: 20px;">Scan to Pay</h2>
+            <div style="background: white; padding: 15px; border-radius: 16px; display: inline-block; margin-bottom: 15px;">
+                <img id="qr-img" src="" style="width: 200px; height: 200px; display: block;">
+            </div>
+            <h3 style="color: var(--accent); margin-bottom: 20px;">Amount: ₹<span id="pay-amt"></span></h3>
+            <button onclick="confirmPay()" class="primary-btn">I Have Paid ✅</button>
+        </div>
+    </div>
+
+    <script>
+        let selectedPlan = '';
+
+        // File Attachment Logic
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if(file) {
+                const inputField = document.getElementById('user-input');
+                inputField.value += `[Attached File: ${file.name}] `;
+                alert(file.name + " attached and ready to send!");
+            }
+        }
+
+        // Chat Logic
+        async function sendMessage() {
+            const input = document.getElementById('user-input');
+            const welcome = document.getElementById('welcome-screen');
+            const chatBox = document.getElementById('chat-box');
+            const text = input.value.trim();
+            if (!text) return;
+
+            welcome.style.display = 'none';
+            chatBox.style.display = 'flex';
+            
+            chatBox.innerHTML += `<div class="msg-row user"><div class="bubble user">${text}</div></div>`;
+            input.value = '';
+            chatBox.scrollTop = chatBox.scrollHeight; 
+
+            try {
+                const res = await fetch('/chat', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({message: text})
+                });
+                const data = await res.json();
+                
+                chatBox.innerHTML += `<div class="msg-row bot"><div class="bubble bot">${data.reply}</div></div>`;
+                chatBox.scrollTop = chatBox.scrollHeight; 
+            } catch (err) {
+                chatBox.innerHTML += `<div class="msg-row bot"><div class="bubble bot" style="color: #ef4444; border-color: #ef4444;">Network error da macha. Try again!</div></div>`;
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }
+        }
+
+        // History Logic
+        async function loadHistory() {
+            try {
+                const res = await fetch('/get_history');
+                const data = await res.json();
+                if(data.length > 0) {
+                    document.getElementById('welcome-screen').style.display = 'none';
+                    const chatBox = document.getElementById('chat-box');
+                    chatBox.style.display = 'flex';
+                    chatBox.innerHTML = data.map(m => `<div class="msg-row ${m.role}"><div class="bubble ${m.role}">${m.content}</div></div>`).join('');
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                } else {
+                    alert("No history found macha!");
+                }
+            } catch (err) {
+                console.error("History load error", err);
+            }
+        }
+
+        // Subscription QR Logic
+        async function openPay(plan) {
+            selectedPlan = plan;
+            document.getElementById('subModal').style.display = 'none';
+            try {
+                const res = await fetch(`/get_payment_qr/${plan}`);
+                const data = await res.json();
+                document.getElementById('qr-img').src = "data:image/png;base64," + data.qr_code;
+                document.getElementById('pay-amt').innerText = data.amount;
+                document.getElementById('paymentModal').style.display = 'flex';
+            } catch(err) {
+                alert("QR Generation Failed! Backend check pannu Raja.");
+            }
+        }
+
+        // Confirm Payment Logic
+        async function confirmPay() {
+            try {
+                const res = await fetch('/confirm_payment', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({plan: selectedPlan})
+                });
+                const data = await res.json();
+                alert(data.message);
+                location.reload(); 
+            } catch(err) {
+                alert("Payment Confirmation Failed!");
+            }
+        }
+
+        // Speech-to-Text Logic
+        function startMic() {
+            if('webkitSpeechRecognition' in window) {
+                const recognition = new webkitSpeechRecognition();
+                recognition.lang = 'en-US'; 
+                recognition.start();
+                recognition.onresult = (e) => { 
+                    document.getElementById('user-input').value = e.results[0][0].transcript; 
+                };
+            } else {
+                alert("Mic not supported in this browser macha. Chrome use pannu.");
+            }
+        }
+
+        // Share App Logic
+        function copyShareLink() {
+            const link = window.location.origin + "/signup";
+            navigator.clipboard.writeText(link);
+            alert("Share Link Copied to Clipboard!");
+        }
+    </script>
+</body>
+</html>
